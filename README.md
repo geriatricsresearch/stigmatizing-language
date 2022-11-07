@@ -22,18 +22,27 @@ We bootstrapped the mean average cosine distance and the differences in mean ave
 ### Bootstrap Method
 Original data are ICU notes from one year at UCSF. Bootstrap datasets were created from these original data, resampling patients to conserve the correlation structure of notes written about the same person. Resulting bootstrap datasets may include a patient more than once. For each bootstrap, using each base word and target word, cosine distances were estimated using word2vec word embeddings.
 
-```
-for each bootstrap_dataset:
-  for each base_word, target_word:
-    estimateCosineDistance(base_word, target_word)   # Estimates Monte-Carlo error
-```
-
-Using the produced data, we calculate the following statistics and create 95% CI for them
+Using the produced data, we calculate the following statistics and create 95% CI for them.
 
 1. Average cosine distance
 2. Difference in mean cosine distance
 3. Precision-weighed average (PWA) cosine distance
 4. Difference in PWA cosine distance
+
+```
+for each bootstrap_dataset:
+  for each base_word, target_word:
+    estimateCosineDistance(base_word, target_word)   # Estimates Monte-Carlo error
+
+for each base_word:
+  for each bootstrap_dataset:
+    # Statistic and amount of target words differs
+    calculateStatisticUsingCosineDistances(base_word, target_words)
+     
+  calculateMean()
+  calculateSD()
+  calculate95CI()
+```
 
 ## Subclasses of Target Words
 | Subclass                      | Strings Used     |
