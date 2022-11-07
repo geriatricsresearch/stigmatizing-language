@@ -1,5 +1,12 @@
 # Stigmatizing Language
-PI: Dr. Julien Cobert
+**Principal Investigator**
+- Julien Cobert
+
+**Data Folk**
+- Edie Espejo
+- Hunter Mills
+
+
 
 | Subclass                      | Strings Used     |
 |-------------------------------|----------------|
