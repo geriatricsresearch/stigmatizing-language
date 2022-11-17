@@ -1,6 +1,7 @@
 # One-sample Bootstrap 95% CI's
 # Edie Espejo
 # 2022-11-04
+# 2022-11-17
 
 
 library(arrow)
@@ -20,9 +21,15 @@ boot_data <- read_parquet(boot_file)
 julien_class <- 'C:/Users/eespejo/Box/projects/stigmatizing-language/Edie class and subclasses.xls'
 class_data   <- read_excel(julien_class) %>% select(class, base_word, subclass)
 
+boot_data0 <- left_join(boot_data, class_data) %>%
+  filter(class == 'stigmatizing') %>%
+  rename(target_word = base_word) %>%
+  filter(bootstrap == 0)
+
 boot_data <- left_join(boot_data, class_data) %>%
   filter(class == 'stigmatizing') %>%
-  rename(target_word = base_word)
+  rename(target_word = base_word) %>%
+  filter(bootstrap != 0)
 
 
 output_folder <- 'C:/Users/eespejo/Box/projects/stigmatizing-language/final-20221104/results-twoSample/'
@@ -42,11 +49,30 @@ two_sample_tests <- boot_data %>%
             mean_ah=mean(ah),
             mean_ch=mean(ch)) %>%
   
-  summarize(ci_ac=make_ci(mean_ac, ci_width=2.13, test_value=0),
-            ci_ah=make_ci(mean_ah, ci_width=2.13, test_value=0),
-            ci_ch=make_ci(mean_ch, ci_width=2.13, test_value=0))
+  summarize(ac=make_ci(mean_ac, ci_width=2.13, test_value=0),
+            ah=make_ci(mean_ah, ci_width=2.13, test_value=0),
+            ch=make_ci(mean_ch, ci_width=2.13, test_value=0))
 
-write.csv(two_sample_tests,
+two_sample_means <- boot_data0 %>%
+  
+  group_by(target_word) %>%
+  mutate(ac=african_american-caucasian) %>%
+  mutate(ah=african_american-hispanic) %>%
+  mutate(ch=caucasian-hispanic) %>%
+  
+  summarize(ac=mean(ac),
+            ah=mean(ah),
+            ch=mean(ch))
+
+two_sample_results <- left_join(two_sample_means %>%
+                                  pivot_longer(!target_word, names_to='comparison', values_to='mean'),
+                                two_sample_tests %>%
+                                  pivot_longer(!target_word, names_to='comparison', values_to='ci')) %>%
+  pivot_wider(names_from=comparison, values_from=c(mean, ci))
+two_sample_save <- two_sample_results[,c(1,2,5,3,6,4,7)]
+
+
+write.csv(two_sample_save,
           paste0(output_folder, 'CI-twoSample95FW.csv'))
 
 
@@ -99,7 +125,18 @@ significance_df <- significance_df %>%
               filter(attr == 'significance') %>% 
               rename(significance=value) %>% 
               select(-attr)) %>%
-  mutate(avg=(lb+ub)/2)
+  mutate(midpt=(lb+ub)/2) %>%
+  left_join(two_sample_means %>%
+              pivot_longer(names_to='comparison', values_to='avg', c(ac, ah, ch)) %>%
+              mutate(comparison=case_when(
+                comparison == 'ac' ~ 'A-C',
+                comparison == 'ah' ~ 'A-H',
+                comparison == 'ch' ~ 'C-H',
+                TRUE ~ as.character(NA)
+              )))
+
+# write.csv(significance_df, '../results-twoSample/CI-twoSample95FWlong.csv')
+
 
 ## One-sample tests for the CI's
 set.seed(42) # !!!!

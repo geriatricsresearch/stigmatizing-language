@@ -1,3 +1,30 @@
+# Precision-Weighted Average (PWA) Mean -------------------
+#      data: Long data, must be filtered for "subclass"
+#      This is a mean of means.
+
+pwa_mean <- function(data) {
+  output <- data %>%
+    group_by(bootstrap, target_word, base_word) %>%
+    
+    summarize(cdk = mean(cosine_distance),
+              sdk = sd(cosine_distance),
+              ak  = 1/sdk^2) %>%
+    ungroup() %>%
+    group_by(bootstrap, base_word) %>%
+    
+    mutate(ak_cdk = cdk * ak) %>%
+    summarize(theta_k = sum(ak_cdk, na.rm=TRUE) / sum(ak, na.rm=TRUE)) %>%
+    
+    ungroup() %>%
+    reshape2::dcast(bootstrap ~ base_word, value.var='theta_k') %>%
+    
+    summarize_at(.vars=c('african_american', 'caucasian', 'hispanic'),
+                 .funs=mean)
+  
+  return(output)
+}
+
+
 # Precision-Weighted Average (PWA) Test -------------------
 #      data: Long data, must be filtered for "subclass"
 

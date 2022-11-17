@@ -1,6 +1,7 @@
 # One-sample Bootstrap 95% CI's
 # Edie Espejo
 # 2022-11-04
+# 2022-11-17
 
 
 library(arrow)
@@ -20,9 +21,15 @@ boot_data <- read_parquet(boot_file)
 julien_class <- 'C:/Users/eespejo/Box/projects/stigmatizing-language/Edie class and subclasses.xls'
 class_data   <- read_excel(julien_class) %>% select(class, base_word, subclass)
 
+boot_data0 <- left_join(boot_data, class_data) %>%
+  filter(class == 'stigmatizing') %>%
+  rename(target_word = base_word) %>%
+  filter(bootstrap == 0)
+
 boot_data <- left_join(boot_data, class_data) %>%
   filter(class == 'stigmatizing') %>%
-  rename(target_word = base_word)
+  rename(target_word = base_word) %>%
+  filter(bootstrap != 0)
 
 output_folder <- 'C:/Users/eespejo/Box/projects/stigmatizing-language/final-20221104/results-oneSample/'
 
@@ -37,7 +44,19 @@ one_sample_tests <- boot_data %>%
   summarize_at(.vars=c('african_american', 'caucasian', 'hispanic'),
                .funs=make_ci)
 
-write.csv(one_sample_tests, paste0(output_folder, 'CI-oneSample95.csv'))
+one_sample_means <- boot_data0 %>%
+  group_by(target_word) %>%
+  summarize_at(.vars=c('african_american', 'caucasian', 'hispanic'),
+               .funs=~mean(., na.rm=TRUE))
+
+one_sample_results <- left_join(one_sample_means %>%
+                                  gather('base', 'mean', c(african_american, caucasian, hispanic)),
+                                one_sample_tests %>%
+                                  gather('base', 'ci', c(african_american, caucasian, hispanic))) %>%
+  pivot_wider(names_from=base, values_from=c(mean, ci))
+one_sample_save <- one_sample_results[,c(1,2,5,3,6,4,7)]
+
+write.csv(one_sample_save, paste0(output_folder, 'CI-oneSample95.csv'))
 
 
 
@@ -58,18 +77,19 @@ one_sample_tests_plottable <- one_sample_tests_plottable_0 %>%
   rename(base_word=variable) %>%
   rename(cosine_distance=value) %>%
   reshape2::dcast(base_word + target_word ~ attr, value.var='cosine_distance') %>%
-  mutate(avg = (lb + ub)/2) %>%
-  mutate(se=(ub-avg)/1.96) %>%
-  mutate(lb_se = avg - se) %>%
-  mutate(ub_se = avg + se) %>%
-  mutate(base_word=factor(base_word, levels=c('african_american', 'caucasian', 'hispanic')))
-
+  left_join(one_sample_means %>%
+              pivot_longer(names_to='base_word',
+                           values_to='avg',
+                           c(african_american, caucasian, hispanic))) %>%
+  mutate(base_word=factor(base_word, levels=c('african_american', 'caucasian', 'hispanic'))) %>%
+  mutate(midpt=(lb+ub)/2)
+# write.csv(one_sample_tests_plottable, '../results-oneSample/CI-oneSample95long.csv')
 
 ## Stigmatizing Language
 one_sample_tests_plottable %>%
   ggplot(aes(x=avg, y=target_word, group=target_word, color=base_word)) +
   geom_vline(xintercept = 1, lwd=1.5, alpha=0.8) +
-  geom_segment(aes(y=target_word, yend=target_word, x=lb_se, xend=ub_se), lwd=1.5, alpha=0.4) +
+  geom_segment(aes(y=target_word, yend=target_word, x=lb, xend=ub), lwd=1.5, alpha=0.4) +
   geom_point(aes(x=avg, y=target_word), pch=15, alpha=0.8) +
   # Colors per base
   scale_color_manual(name='Base word',
@@ -113,7 +133,7 @@ one_sample_tests_plottable %>%
   filter(subclass == 'passivity') %>%
   ggplot(aes(x=avg, y=target_word, group=target_word, color=base_word)) +
   geom_vline(xintercept = 1, lwd=1.5, alpha=0.8) +
-  geom_segment(aes(y=target_word, yend=target_word, x=lb_, xend=ub), lwd=1.5, alpha=0.4) +
+  geom_segment(aes(y=target_word, yend=target_word, x=lb, xend=ub), lwd=1.5, alpha=0.4) +
   geom_point(aes(x=avg, y=target_word), pch=15, alpha=0.8) +
   theme_bw() +
   # Remove extraneous labels
@@ -163,3 +183,4 @@ one_sample_tests_plottable %>%
                      labels=c('African-American', 'Caucasian', 'Hispanic'),
                      values=c( '#61B329', '#1874CD',  '#FFC125'))
 ggsave(filename=paste0(output_folder, 'plot-noncompliance.png'), width=7, height=5)
+
