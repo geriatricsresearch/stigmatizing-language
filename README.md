@@ -27,7 +27,7 @@ Bootstrap confidence intervals were created to test:
 1. Whether or not an *average* cosine similarity was 0 or not, where **a value of 0 would denote the target and base word were unrelated terms** and
 2. Whether two mean cosine similarity were the same or not.
 
-We bootstrapped the mean average cosine similarity and the differences in mean average. To compare across words of the same subclass/synonymous terms/conjugations, we bootstrapped the *precision-weighted average* cosine distance. Likewise, we bootstrapped the difference in the PWA cosine similarities.
+We bootstrapped the mean average cosine similarity and the differences in mean average. To compare across words of the same subclass/synonymous terms/conjugations, we bootstrapped the *precision-weighted average* cosine similarity. Likewise, we bootstrapped the similarity in the PWA cosine similarities.
 
 ### Bootstrap Method
 Original data are ICU notes from one year at UCSF. Bootstrap datasets were created from these original data, resampling patients to conserve the correlation structure of notes written about the same person. Resulting bootstrap datasets may include a patient more than once. For each bootstrap, using each base word and target word, cosine similarities were estimated using word2vec word embeddings.
@@ -47,7 +47,7 @@ for each bootstrap_dataset:
 for each base_word:
   for each bootstrap_dataset:
     # Statistic and amount of target words differs
-    calculateStatisticUsingCosineDistances(base_word, target_words)
+    calculateStatisticUsingCosineSimilarities(base_word, target_words)
      
   calculateMean()
   calculateSD()
