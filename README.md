@@ -4,10 +4,10 @@
 
 ## Data
 This project leveraged notes of patients >= 18 years old from 2 separate hospitals.
-1. University of California, San Francisco
+- University of California, San Francisco
   - Private data source
   - De-identified dataset, years 2012 to 2022
-3. Beth Israel Deaconess Medical Center
+- Beth Israel Deaconess Medical Center
   - Public data source developed by MIT and BIDMC
   - MIMIC-III database, years 2001 to 2012
 
