@@ -19,7 +19,7 @@ This project leveraged notes of patients >= 18 years old from 2 separate hospita
 ## Natural Language Processing
 - Preprocessed n-grams using word2vec (w2v) with continuous bag of words that predicts presence of word using its surrounding word context
 - To estimate contextual word similarity, w2v models were fit between each base and target word
-- **Due to protections surrounding UCSF data, NLP models and results will are shared here for the MIMIC dataset.** Statistical analysis code will be shared.
+- **Due to protections surrounding UCSF data, NLP models and results will are shared here for the MIMIC dataset.** Statistical analysis code (bootstraps and plots) will be shared.
 
 ## Bootstraps
 Bootstrap confidence intervals were created to test:
