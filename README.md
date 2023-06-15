@@ -2,37 +2,42 @@
 **Principal Investigator**
 - Julien Cobert
 
-**Data Folk**
-- Edie Espejo
-- Hunter Mills
+## Data
+This project leveraged notes of patients >= 18 years old from 2 separate hospitals.
+1. University of California, San Francisco
+  - Private data source
+  - De-identified dataset, years 2012 to 2022
+3. Beth Israel Deaconess Medical Center
+  - Public data source developed by MIT and BIDMC
+  - MIMIC-III database, years 2001 to 2012
 
 ## Definitions
 - Base word: We study 3 ethnic base words: "caucasian", "african_american", and "hispanic" (simplified)
 - Target word: We have a list of stigmatizing words and their conjugations.
-- Cosine distance: This is the measurement of (dis)similarity within context of words, in this case, all ICU notes within the year.
+- Cosine similarity: This is the measurement of similarity within context of words, in this case, all ICU notes within the year.
 
 ## Bootstraps
 Bootstrap confidence intervals were created to test:
 
-1. Whether or not an *average* cosine distance was 1 or not, where a value of 1 would denote the target and base word were unrelated terms and
-2. Whether two mean cosine distances were the same or not.
+1. Whether or not an *average* cosine similarity was 0 or not, where **a value of 0 would denote the target and base word were unrelated terms** and
+2. Whether two mean cosine similarity were the same or not.
 
-We bootstrapped the mean average cosine distance and the differences in mean average. To compare across words of the same subclass/synonymous terms/conjugations, we bootstrapped the *precision-weighted average* cosine distance. Likewise, we bootstrapped the difference in the PWA cosine distances.
+We bootstrapped the mean average cosine similarity and the differences in mean average. To compare across words of the same subclass/synonymous terms/conjugations, we bootstrapped the *precision-weighted average* cosine distance. Likewise, we bootstrapped the difference in the PWA cosine similarities.
 
 ### Bootstrap Method
-Original data are ICU notes from one year at UCSF. Bootstrap datasets were created from these original data, resampling patients to conserve the correlation structure of notes written about the same person. Resulting bootstrap datasets may include a patient more than once. For each bootstrap, using each base word and target word, cosine distances were estimated using word2vec word embeddings.
+Original data are ICU notes from one year at UCSF. Bootstrap datasets were created from these original data, resampling patients to conserve the correlation structure of notes written about the same person. Resulting bootstrap datasets may include a patient more than once. For each bootstrap, using each base word and target word, cosine similarities were estimated using word2vec word embeddings.
 
 Using the produced data, we calculate the following statistics and create 95% CI for them.
 
-1. Average cosine distance
-2. Difference in mean cosine distance
-3. Precision-weighed average (PWA) cosine distance
-4. Difference in PWA cosine distance
+1. Average cosine similarity
+2. Difference in mean cosine similarity
+3. Precision-weighed average (PWA) cosine similarity
+4. Difference in PWA cosine similarity
 
 ```
 for each bootstrap_dataset:
   for each base_word, target_word:
-    estimateCosineDistance(base_word, target_word)   # Estimates Monte-Carlo error
+    estimateCosineSimilarity(base_word, target_word)   # Simulates Monte-Carlo error using 20 shuffles
 
 for each base_word:
   for each bootstrap_dataset:
