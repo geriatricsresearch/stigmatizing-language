@@ -16,6 +16,10 @@ This project leveraged notes of patients >= 18 years old from 2 separate hospita
 - Target word: We have a list of stigmatizing words and their conjugations.
 - Cosine similarity: This is the measurement of similarity within context of words, in this case, all ICU notes within the year.
 
+## Natural Language Processing
+- Preprocessed n-grams using word2vec (w2v) with continuous bag of words that predicts presence of word using its surrounding word context
+- To estimate contextual word similarity, w2v models were fit between each base and target word
+
 ## Bootstraps
 Bootstrap confidence intervals were created to test:
 
