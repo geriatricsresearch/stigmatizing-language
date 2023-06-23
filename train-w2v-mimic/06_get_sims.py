@@ -234,22 +234,9 @@ stigma = set([
  'defensiveness'
 ])
 
-vulnerable = ['vulnerable', 'vulnerability', 'fragile', 'fragility', 'frail', 'frailty']
-
-
-
-def get_path(i,j):
-    return path + 'race_{}_{}.kv'.format(i,j)
-
-def load_model(i,j):
-    path = get_path(i,j)
-    return KeyedVectors.load(path, mmap='r')
-
-def get_similarity(model, word, other_words):
-    return [1 - model.distance(word, other_word) 
-            if word in model and other_word in model
-            else np.nan
-            for other_word in other_words]
+vulnerable = [
+    'vulnerable', 'vulnerability', 'fragile', 'fragility', 'frail', 'frailty'
+]
 
 classes = {
     'palliative care': pc, 
@@ -259,12 +246,67 @@ classes = {
     'vulernability': vulnerable
 }
 
+
+def get_path(i,j):
+    '''
+    helper funtion to build path
+    '''
+    return path + 'race_{}_{}.kv'.format(i,j)
+
+
+def load_model(i,j):
+    '''
+    helper function to load w2v model
+    '''
+    path = get_path(i,j)
+    return KeyedVectors.load(path, mmap='r')
+
+
+def get_similarity(model, word, other_words):
+    '''
+    function to get similarities between base 'word' and target 'other_words'.
+    any missing words are set to NaN similarity.
+
+    INPUTS:
+        model (gensim.KeyedVectors): w2v model
+        word (str): base
+        other_words (list of str): targets
+
+    RETURNS:
+        out (list of float): base target similarities (order maintained)
+    '''
+    return [1 - model.distance(word, other_word) 
+            if word in model and other_word in model
+            else np.nan
+            for other_word in other_words]
+
+
 def get_sim(model, i, j):
+    '''
+    function to get similarities for each class of terms and race tokens.
+
+    INPUTS:
+        model (gensim.KeyedVectors): w2v model
+        i (int): value for bootstrap random seed
+        j (int): value for shuffle random seed
+
+    RETURNS:
+        l (list of lists): similarities for the w2v model
+            l[0] (int): value for bootstrap random seed (i)
+            l[1] (int): value for shuffle random seed (j)
+            l[2] (str): class for base word
+            l[3] (str): base word
+            l[4] (float): similarity bwtween base and African American
+            l[5] (float): similarity bwtween base and Caucasian
+            l[6] (float): similarity bwtween base and Latin-x
+
+    '''
     return [[i, j, cl, target, *get_similarity(model, target, races)]
             for cl, targets in classes.items() for target in targets]      
 
 
 if __name__ =='__main__':
+    # get similarities for each bootstrapped model
     values = []
     for i in range(nboot):
         for j in range(nshuff):
@@ -277,12 +319,13 @@ if __name__ =='__main__':
                 print(' ' * 50, end='\r')
                 print('ooof', i, j)
 
+    # dump bootstrapped similarities
     columns=['bootstrap', 'shuffle', 'class', 'base_word', 'african_american', 
              'caucasian', 'hispanic']
-
     df = pd.DataFrame(values, columns=columns)
     df.to_parquet('m3_bootstraps.parquet')
 
+    # get similarities for each orginal model
     values = []
     for i in ['og']:
         for j in range(nshuff):
@@ -294,11 +337,10 @@ if __name__ =='__main__':
             except:
                 print(' ' * 50, end='\r')
                 print('ooof', i, j)
-                
+    
+    # dump original similaritie       
     columns=['bootstrap', 'shuffle', 'class', 'base_word', 'african_american', 
              'caucasian', 'hispanic']
-
     df = pd.DataFrame(values, columns=columns)
-
     df['bootstrap'] = 'orignal!'
     df.to_parquet('m3_original.parquet')

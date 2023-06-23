@@ -64,6 +64,7 @@ if __name__ == '__main__':
     n = len(df[['pid', 'nid']].drop_duplicates())
     gb = df.groupby(['pid', 'nid'])
 
+    #convert text to trigrams (chunks for progress transparency)
     for i, ((pid, nid), sub_df) in enumerate(gb):
         tri = trigram[bigram[[sent.split() for sent in sub_df['sent']]]]
         tri = [' '.join(sent) for sent in tri]
@@ -71,6 +72,7 @@ if __name__ == '__main__':
             out.append([pid, nid, sent])
         if i % 10000 == 0:
             print(i, '/', n, end='\r')
-            
+    
+    # convert list of lists to dataframe and dump
     out = pd.DataFrame(out, columns=['pid', 'nid', 'sent'])
     out.to_parquet(opath)
