@@ -1,7 +1,7 @@
 # Edie Espejo
 # 2023-02-02
 
-setwd('C:/Users/eespejo/Box/projects/stigmatizing-language/cosine-similarities')
+setwd('C:/Users/eespejo/Box/IC Case Study - Julien Cobert/edie/stigmatizing-language/cosine-similarities')
 output_folder <- 'results - means/'
 
 
@@ -96,8 +96,9 @@ bootstrap_ci <- left_join(original_means, bootstrap_se) %>%
   mutate(bootstrap_me=qnorm(0.975)*bootstrap_se) %>%
   mutate(lb=mean-bootstrap_me) %>%
   mutate(ub=mean+bootstrap_me) %>%
-  mutate(significant=ifelse(lb<=0 & 0<=ub, 0, 1))
-  
+  mutate(significant=ifelse(lb<=0 & 0<=ub, 0, 1)) %>%
+  mutate(pvalue=2*(1-pnorm(abs(mean)/bootstrap_se))) %>%
+  mutate(pvalue=ifelse(pvalue>1, 1, pvalue))
 
 write.csv(bootstrap_ci, paste0(output_folder, 'CI-means95.csv'))
 

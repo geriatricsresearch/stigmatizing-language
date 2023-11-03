@@ -92,11 +92,19 @@ bootstrap_se <- boot_data %>%
   pivot_longer(names_to='base_word', values_to='bootstrap_se', cols=c(african_american, caucasian, hispanic))
 
 
+# bootstrap_ci <- left_join(original_means, bootstrap_se) %>%
+#   mutate(bootstrap_me=qnorm(0.975)*bootstrap_se) %>%
+#   mutate(lb=mean-bootstrap_me) %>%
+#   mutate(ub=mean+bootstrap_me) %>%
+#   mutate(significant=ifelse(lb<=0 & 0<=ub, 0, 1))
+
 bootstrap_ci <- left_join(original_means, bootstrap_se) %>%
   mutate(bootstrap_me=qnorm(0.975)*bootstrap_se) %>%
   mutate(lb=mean-bootstrap_me) %>%
   mutate(ub=mean+bootstrap_me) %>%
-  mutate(significant=ifelse(lb<=0 & 0<=ub, 0, 1))
+  mutate(significant=ifelse(lb<=0 & 0<=ub, 0, 1)) %>%
+  mutate(pvalue=2*(1-pnorm(abs(mean)/bootstrap_se))) %>%
+  mutate(pvalue=ifelse(pvalue>1, 1, pvalue))
   
 
 write.csv(bootstrap_ci, paste0(output_folder, 'CI-means95.csv'))

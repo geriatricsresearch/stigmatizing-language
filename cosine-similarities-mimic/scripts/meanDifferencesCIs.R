@@ -75,8 +75,9 @@ differences_ci <- left_join(original_differences, bootstrap_se) %>%
   mutate(bootstrap_me=qnorm(1-(0.05/3))*bootstrap_se) %>%
   mutate(lb=mean_difference-bootstrap_me) %>%
   mutate(ub=mean_difference+bootstrap_me) %>%
-  mutate(significant=ifelse(lb<=0 & 0<=ub, 0, 1))  # No changes here, but in meanCIs.R changed 1->0. These are difference so remain 0.
-
+  mutate(significant=ifelse(lb<=0 & 0<=ub, 0, 1)) %>%  # No changes here, but in meanCIs.R changed 1->0. These are difference so remain 0.
+  mutate(pvalue=2*(1-pnorm(abs(mean_difference)/bootstrap_se))) %>%
+  mutate(pvalue=ifelse(pvalue>1, 1, pvalue))
 
 write.csv(differences_ci,
           paste0(output_folder, 'CI-meanDifferences95FW.csv'))

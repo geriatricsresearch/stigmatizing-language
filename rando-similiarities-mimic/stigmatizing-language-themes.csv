@@ -1,0 +1,7 @@
+﻿theme,target words
+violence,"combative', 'defensiveness', 'agitation', 'agitated', 'defensive', 'confronting', 'agitate', 'confront', 'confronted', 'combativeness', 'angry', 'angrily', 'aggressiveness', 'aggression', 'confrontation', 'aggressively', 'aggressive', 'confrontational'"
+passivity,"nonadherent', 'challenges', 'noncooperative', 'resists', 'challenging', 'resisting', 'resist', 'resisted', 'non_compliant', 'noncompliant', 'resistance', 'unpleasant', 'noncompliance', 'non_adherence', 'non_compliance', 'challenged', 'non_adherent', 'resistances', 'resistant', 'nonadherence'"
+nonadherence,"nonadherent', 'non_adherence', 'non_adherent', 'nonadherence'"
+noncompliance,"non_compliant', 'noncompliant', 'noncompliance', 'non_compliance'"
+nonadherence/noncompliance,"nonadherent', 'non_adherence', 'non_adherent', 'nonadherence', 'non_compliant', 'noncompliant', 'noncompliance', 'non_compliance'"
+describe_patient,"noncooperative', 'nonadherent', 'non_adherence', 'non_adherent', 'nonadherence', 'noncompliance', 'non_compliant', 'non_compliance', 'noncompliant', 'anger', 'angrily', 'combative', 'confront', 'unpleasant', 'agitation'"

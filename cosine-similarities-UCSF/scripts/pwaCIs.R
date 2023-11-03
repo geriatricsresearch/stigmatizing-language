@@ -1,7 +1,7 @@
 # Edie Espejo
 # 2023-02-02
 
-setwd('C:/Users/eespejo/Box/projects/stigmatizing-language/cosine-similarities')
+setwd('C:/Users/eespejo/Box/IC Case Study - Julien Cobert/edie/stigmatizing-language/cosine-similarities')
 pwa_folder     <- 'results - pwa/'
 pwadiff_folder <- 'results - pwaDifferences/'
 
@@ -107,7 +107,8 @@ genPWAtable <- function(original_pwa, bootstrap_pwa_se) {
     mutate(bootstrap_me=qnorm(0.975)*bootstrap_se) %>%
     mutate(lb=pwa-bootstrap_me) %>%
     mutate(ub=pwa+bootstrap_me) %>%
-    mutate(significant=ifelse(lb<=0 & 0<=ub, 0, 1)) # Changed this from lb<=1 --> lb<=0.
+    mutate(significant=ifelse(lb<=0 & 0<=ub, 0, 1)) %>% # Changed this from lb<=1 --> lb<=0. %>%
+    mutate(pvalue=2*(1-pnorm(abs(pwa)/bootstrap_se)))
   
   return(pwa_results)
 }
@@ -177,7 +178,8 @@ genPWAdifftable <- function(original_pwa_diff, bootstrap_pwa_diff_se, multiplier
     mutate(bootstrap_me=multiplier*bootstrap_se) %>%
     mutate(lb=pwa_difference-bootstrap_me) %>%
     mutate(ub=pwa_difference+bootstrap_me) %>%
-    mutate(significant=ifelse(lb<=0 & 0<=ub, 0, 1))
+    mutate(significant=ifelse(lb<=0 & 0<=ub, 0, 1)) %>%
+    mutate(pvalue=2*(1-pnorm(abs(pwa_difference)/bootstrap_se)))
   
   return(pwa_diff_results)
 }
@@ -304,7 +306,8 @@ ggsave(paste0(pwa_folder, 'plot-describe_patient.png'), width=10, height=7)
 
 pwa_ci_list <- lapply(1:length(pwa_ci), function(k) pwa_ci[[k]] %>% mutate(theme=names(pwa_ci)[k]))
 pwa_ci_df   <- do.call(rbind, pwa_ci_list) %>%
-  select(theme, base_word, pwa, bootstrap_se, bootstrap_me, lb, ub, significant)
+  select(theme, base_word, pwa, bootstrap_se, bootstrap_me, lb, ub, significant, pvalue) %>%
+  mutate(pvalue=ifelse(pvalue>1, 1, pvalue))
 
 write.csv(pwa_ci_df, paste0(pwa_folder, 'CI-pwa95.csv'))
 
@@ -317,6 +320,7 @@ pwa_diff_ci_df   <- do.call(rbind, pwa_diff_ci_list) %>%
     comparison == 'ch' ~ 'C-H',
     TRUE ~ as.character(NA)
   )) %>%
-  select(theme, comparison, pwa_difference, bootstrap_se, bootstrap_me, lb, ub, significant)
+  select(theme, comparison, pwa_difference, bootstrap_se, bootstrap_me, lb, ub, significant, pvalue) %>%
+  mutate(pvalue=ifelse(pvalue>1, 1, pvalue))
 
 write.csv(pwa_diff_ci_df, paste0(pwadiff_folder, 'CI-pwaDiff95FW.csv'))

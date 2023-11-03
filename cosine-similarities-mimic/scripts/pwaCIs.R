@@ -107,7 +107,8 @@ genPWAtable <- function(original_pwa, bootstrap_pwa_se) {
     mutate(bootstrap_me=qnorm(0.975)*bootstrap_se) %>%
     mutate(lb=pwa-bootstrap_me) %>%
     mutate(ub=pwa+bootstrap_me) %>%
-    mutate(significant=ifelse(lb<=0 & 0<=ub, 0, 1)) # Changed this from lb<=1 --> lb<=0.
+    mutate(significant=ifelse(lb<=0 & 0<=ub, 0, 1)) %>% # Changed this from lb<=1 --> lb<=0.
+    mutate(pvalue=2*(1-pnorm(abs(pwa)/bootstrap_se)))
   
   return(pwa_results)
 }
@@ -177,7 +178,8 @@ genPWAdifftable <- function(original_pwa_diff, bootstrap_pwa_diff_se, multiplier
     mutate(bootstrap_me=multiplier*bootstrap_se) %>%
     mutate(lb=pwa_difference-bootstrap_me) %>%
     mutate(ub=pwa_difference+bootstrap_me) %>%
-    mutate(significant=ifelse(lb<=0 & 0<=ub, 0, 1))
+    mutate(significant=ifelse(lb<=0 & 0<=ub, 0, 1)) %>%
+    mutate(pvalue=2*(1-pnorm(abs(pwa_difference)/bootstrap_se)))
   
   return(pwa_diff_results)
 }
